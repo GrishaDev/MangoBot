@@ -1,0 +1,16 @@
+{
+  "name": "mangobot",
+  "version": "1.0.0",
+  "description": "bot for discord",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "runbot": "node index.js"
+  },
+  "author": "GrishaDev",
+  "license": "ISC",
+  "dependencies": {
+    "discord.io": "github:woor/discord.io#gateway_v6",
+    "winston": "^3.0.0"
+  }
+}

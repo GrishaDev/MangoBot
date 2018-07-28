@@ -1,0 +1,33 @@
+{
+    "data":
+    [
+        {
+            "phrase": "dota",
+            "answer": "We gona play dota??"
+        },
+        {
+            "phrase": "afk",
+            "answer": "Dont afk or i ban u"
+        },
+        {
+            "phrase": "gleb",
+            "answer": "GLEB IS HERE?"
+        },
+        {
+            "phrase": "bored",
+            "answer": "Eat a mango (:"
+        },
+        {
+            "phrase": "da",
+            "answer": "i am bored"
+        },
+        {
+            "phrase": "bot",
+            "answer": "Did you say bot? Mango is here!"
+        },
+        {
+            "phrase": "tango",
+            "answer": "NO! buy mango!"
+        }
+    ]
+}
