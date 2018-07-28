@@ -43,7 +43,7 @@ bot.on('presence', function(user, userID, status, game, event)
     {
         var msg;
         if(status=="online")
-            msg = '<@'+user+'> aka GLEB IS HERE!!!!'
+            msg = '<@'+userID+'> aka GLEB IS HERE!!!!'
         else
             msg="gleb left cri"
         
