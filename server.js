@@ -1,29 +1,48 @@
+const http = require('http');
+const express = require('express');
+const app = express();
+const https = require('https');
 var Discord = require('discord.io');
-var auth = require('./auth.json');
 var answers = require ('./answers.json')
 var people = require ('./people.json')
-const https = require('https');
 
-const MAIN_CHANNEL = auth.mainchannel;
-const GLEB_ID = auth.glebid;
+const MAIN_CHANNEL = process.env.mainchannel;
+const GLEB_ID = process.env.glebid;
 
-var drole = auth.drole; 
-var serverid = auth.serverid; 
+var drole = process.env.drole; 
+var serverid = process.env.serverid; 
 
 var bot = new Discord.Client({
-   token: auth.token,
+   token: process.env.token,
    autorun: true
 });
+
+app.get("/", (request, response) => {
+  console.log(Date.now() + " Ping Received");
+  response.sendStatus(200);
+});
+
+app.listen(process.env.PORT);
+setInterval(() => {
+  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
+}, 280000);
 
 
 bot.on('ready', function (channelID,evt) 
 {
-    console.log(bot.serverid);
+    //console.log(bot.username);
+    //console.log(bot.servers);
+    //console.log(bot.channels);
     bot.setPresence({
         game: {
           name: 'dota 6',
           type: 0
         }
+    });
+
+    bot.sendMessage({
+        to: MAIN_CHANNEL,
+        message: "Mango bot restarted!"
     });
     console.log(bot.username+' aka '+bot.id+' is online and ready!');
 });
@@ -41,10 +60,12 @@ bot.on('presence', function(user, userID, status, game, event)
     console.log(user+" is "+status)
     if(userID==GLEB_ID)
     {
+
         var msg;
-        if(status=="online")
-            msg = '<@'+userID+'> aka GLEB IS HERE!!!!'
-        else
+        // if(status=="online" && previous!="idle")
+        //     msg = '<@'+userID+'> aka GLEB IS HERE!!!!'
+        // else 
+        if(status=="offline")
             msg="gleb left cri"
         
         bot.sendMessage({
@@ -62,7 +83,15 @@ bot.on('message', function (user, userID, channelID, message, evt)
         var cmd = args[0];
         var cmd2 = args[1];
 
+        var final="";
+
+        for(var i=1; i<args.length; i++)
+        {
+            final+=args[i]+" ";
+        }
+
         args = args.splice(1);
+
         switch(cmd) {
             case 'ping':
                 bot.sendMessage({
@@ -111,6 +140,12 @@ bot.on('message', function (user, userID, channelID, message, evt)
                 bot.sendMessage({
                     to: channelID,
                     message: JSON.stringify(all)
+                });
+            break;
+            case 'say':
+                bot.sendMessage({
+                    to: MAIN_CHANNEL,
+                    message: final
                 });
             break;
          }
@@ -163,31 +198,3 @@ function getLatestMatch(playerid,bot,channelID)
             });
         });
 }
-
-// trash
-    // if(callback.guild_id == serverid)
-    //     bot.addToRole({"serverID":serverid,"userID":callback.id,"roleID":drole},function(err,response) 
-    //     {
-    //         console.log(response);
-    //         console.log("assigned to lowmmr rank!");
-    //         bot.sendMessage({
-    //             to: MAIN_CHANNEL,
-    //             message: "Welcome "+callback.user
-    //         });
-    //         if (err) console.error(err);
-    //             console.log("error cri");
-    //     });
- // -- other trash
-    // else
-    // {
-    //     var msg;
-    //     if(status=="online")
-    //         msg = "Hello there "+user
-    //     else
-    //         msg="bye bye "+user
-        
-    //     bot.sendMessage({
-    //         to: MAIN_CHANNEL,
-    //         message: msg
-    //     });
-    // }
