@@ -28,6 +28,10 @@
         {
             "phrase": "tango",
             "answer": "NO! buy mango!"
+        },
+        {
+            "phrase": "mango",
+            "answer": "Yes i am mango, i might help you."
         }
     ]
 }

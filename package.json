@@ -1,16 +1,28 @@
 {
-  "name": "mangobot",
-  "version": "1.0.0",
-  "description": "bot for discord",
-  "main": "index.js",
+  "//1": "describes your app and its dependencies",
+  "//2": "https://docs.npmjs.com/files/package.json",
+  "//3": "updating this file will download and update your packages",
+  "name": "hello-express",
+  "version": "0.0.1",
+  "description": "A simple Node app built on Express, instantly up and running.",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "runbot": "node index.js"
+    "start": "node server.js"
   },
-  "author": "GrishaDev",
-  "license": "ISC",
   "dependencies": {
-    "discord.io": "github:woor/discord.io#gateway_v6",
-    "winston": "^3.0.0"
-  }
+    "express": "^4.16.3",
+    "discord.io": "github:woor/discord.io#gateway_v6"
+  },
+  "engines": {
+    "node": "8.x"
+  },
+  "repository": {
+    "url": "https://glitch.com/edit/#!/hello-express"
+  },
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "glitch",
+    "express"
+  ]
 }
