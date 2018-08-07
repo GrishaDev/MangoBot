@@ -6,6 +6,8 @@ var Discord = require('discord.io');
 var answers = require ('./answers.json')
 var people = require ('./people.json')
 
+// git test!!
+
 const MAIN_CHANNEL = process.env.mainchannel;
 const GLEB_ID = process.env.glebid;
 
