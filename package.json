@@ -10,8 +10,10 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "discord.io": "github:woor/discord.io#gateway_v6",
     "express": "^4.16.3",
-    "discord.io": "github:woor/discord.io#gateway_v6"
+    "ffmpeg": "0.0.4",
+    "ytdl-core": "^0.24.0"
   },
   "engines": {
     "node": "8.x"

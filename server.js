@@ -1,22 +1,28 @@
 const http = require('http');
 const express = require('express');
 const app = express();
+var auth = require('./auth.json');
 const https = require('https');
 var Discord = require('discord.io');
-var answers = require ('./answers.json')
-var people = require ('./people.json')
+var answers = require ('./answers.json');
+var people = require ('./people.json');
+const fs = require('fs');
+const ytdl = require('ytdl-core');
 
 // Welcome to staging! It's testing code, not ready!
 // git test!!
 
-const MAIN_CHANNEL = process.env.mainchannel;
-const GLEB_ID = process.env.glebid;
+// const MAIN_CHANNEL = process.env.mainchannel;
+// const GLEB_ID = process.env.glebid;
 
-var drole = process.env.drole; 
-var serverid = process.env.serverid; 
+// var drole = process.env.drole; 
+// var serverid = process.env.serverid; 
+
+ const MAIN_CHANNEL = auth.mainchannel;
+ var serverid =auth.serverid; 
 
 var bot = new Discord.Client({
-   token: process.env.token,
+   token: auth.token,
    autorun: true
 });
 
@@ -25,10 +31,10 @@ app.get("/", (request, response) => {
   response.sendStatus(200);
 });
 
-app.listen(process.env.PORT);
-setInterval(() => {
-  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-}, 280000);
+// app.listen(process.env.PORT);
+// setInterval(() => {
+//   http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
+// }, 280000);
 
 
 bot.on('ready', function (channelID,evt) 
@@ -163,13 +169,27 @@ bot.on('message', function (user, userID, channelID, message, evt)
                     {
                         console.log("%s is " + (speakingBool ? "now speaking" : "done speaking"), userID );
                     });
+
+                    bot.getAudioContext(VCID, function(error, stream) 
+                    {
+                        if (error) return console.error(error);
+
+                        ytdl('https://www.youtube.com/watch?v=UsnRQJxanVM&t')
+                        .pipe(fs.createWriteStream('video.flv'));
+
+                        fs.createReadStream('video.flv').pipe(stream, {end: false});
+                    
+                        stream.on('done', function() {
+                           console.log("done");
+                        });
+                    });
+
                 });
             break;
             case 'dc':
                 var VCID = bot.servers[serverid].members[bot.id].voice_channel_id;
 
                 console.log(VCID);
-                //console.log(JSON.stringify(bot));
 
                 if (!VCID) return;
 
