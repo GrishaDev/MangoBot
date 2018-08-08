@@ -165,7 +165,7 @@ bot.on('message', function (user, userID, channelID, message, evt)
                 });
             break;
             case 'dc':
-                var VCID = bot.voice_channel_id;
+                var VCID = bot.servers[serverid].members[bot.id].voice_channel_id;
 
                 console.log(VCID);
                 console.log(JSON.stringify(bot));
