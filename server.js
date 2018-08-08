@@ -6,6 +6,7 @@ var Discord = require('discord.io');
 var answers = require ('./answers.json')
 var people = require ('./people.json')
 
+// Welcome to staging! It's testing code, not ready!
 // git test!!
 
 const MAIN_CHANNEL = process.env.mainchannel;
