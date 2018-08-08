@@ -151,9 +151,9 @@ bot.on('message', function (user, userID, channelID, message, evt)
                 });
             break;
             case 'voice':
-                console.log(bot.servers[serverid].members[userID]);
                 var VCID = bot.servers[serverid].members[userID].voice_channel_id;
-                
+                if (!VCID) return;
+
                 bot.joinVoiceChannel(VCID, function(err, events) 
                 {
                     if (err) return console.error(err);
@@ -162,6 +162,15 @@ bot.on('message', function (user, userID, channelID, message, evt)
                     {
                         console.log("%s is " + (speakingBool ? "now speaking" : "done speaking"), userID );
                     });
+                });
+            break;
+            case 'dc':
+                var VCID = bot.voice_channel_id;
+                if (!VCID) return;
+
+                client.leaveVoiceChannel(VCID,function(err, events)
+                {
+                    if (err) return console.error(err);
                 });
             break;
          }
