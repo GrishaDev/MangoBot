@@ -166,6 +166,10 @@ bot.on('message', function (user, userID, channelID, message, evt)
             break;
             case 'dc':
                 var VCID = bot.voice_channel_id;
+
+                console.log(VCID);
+                console.log(JSON.stringify(bot));
+
                 if (!VCID) return;
 
                 bot.leaveVoiceChannel(VCID,function(err, events)
