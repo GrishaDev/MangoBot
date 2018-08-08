@@ -168,7 +168,7 @@ bot.on('message', function (user, userID, channelID, message, evt)
                 var VCID = bot.servers[serverid].members[bot.id].voice_channel_id;
 
                 console.log(VCID);
-                console.log(JSON.stringify(bot));
+                //console.log(JSON.stringify(bot));
 
                 if (!VCID) return;
 
