@@ -150,6 +150,18 @@ bot.on('message', function (user, userID, channelID, message, evt)
                     message: final
                 });
             break;
+            case 'voice':
+                var VCID = channelID;
+                bot.joinVoiceChannel(VCID, function(err, events) 
+                {
+                    if (err) return console.error(err);
+
+                    events.on('speaking', function(userID, SSRC, speakingBool) 
+                    {
+                        console.log("%s is " + (speakingBool ? "now speaking" : "done speaking"), userID );
+                    });
+                });
+            break;
          }
      }
      else
@@ -199,4 +211,18 @@ function getLatestMatch(playerid,bot,channelID)
                 message: "Error with dota api"
             });
         });
+}
+
+async function voiceConnect(message)
+{
+    if (!message.guild) return;
+
+    // Only try to join the sender's voice channel if they are in one themselves
+    if (message.member.voiceChannel) 
+    {
+        const connection = await message.member.voiceChannel.join();
+    } else 
+    {
+        message.reply('You need to join a voice channel first!');
+    }
 }
