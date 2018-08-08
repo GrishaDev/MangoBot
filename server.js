@@ -168,7 +168,7 @@ bot.on('message', function (user, userID, channelID, message, evt)
                 var VCID = bot.voice_channel_id;
                 if (!VCID) return;
 
-                client.leaveVoiceChannel(VCID,function(err, events)
+                bot.leaveVoiceChannel(VCID,function(err, events)
                 {
                     if (err) return console.error(err);
                 });
