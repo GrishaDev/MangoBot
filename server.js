@@ -151,7 +151,9 @@ bot.on('message', function (user, userID, channelID, message, evt)
                 });
             break;
             case 'voice':
-                var VCID = channelID;
+                console.log(bot.servers[serverid].members[userID]);
+                var VCID = bot.servers[serverid].members[userID].voice_channel_id;
+                
                 bot.joinVoiceChannel(VCID, function(err, events) 
                 {
                     if (err) return console.error(err);
