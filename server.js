@@ -1,94 +1,99 @@
 const http = require('http');
+const path   = require('path');
 const express = require('express');
 const app = express();
 var auth = require('./auth.json');
 const https = require('https');
-var Discord = require('discord.io');
+//var Discord = require('discord.io');
+ const Discord = require("discord.js");
 var answers = require ('./answers.json');
 var people = require ('./people.json');
 const fs = require('fs');
 const ytdl = require('ytdl-core');
+const ffmpeg = require('fluent-ffmpeg');
 
-// Welcome to staging! It's testing code, not ready!
-// git test!!
+//Ready for main branch
 
-// const MAIN_CHANNEL = process.env.mainchannel;
-// const GLEB_ID = process.env.glebid;
+ const MAIN_CHANNEL = process.env.mainchannel;
+ const GLEB_ID = process.env.glebid;
 
+//const GLEB_ID = auth.glebid;
 // var drole = process.env.drole; 
-// var serverid = process.env.serverid; 
+//var serverid = process.env.serverid; 
+//const MAIN_CHANNEL = auth.mainchannel;
 
- const MAIN_CHANNEL = auth.mainchannel;
- var serverid =auth.serverid; 
+var general; 
 
-var bot = new Discord.Client({
-   token: auth.token,
-   autorun: true
-});
+//var serverid =auth.serverid; 
+
+var bot = new Discord.Client({autoReconnect:true});
+// {
+//     token: auth.token,
+//     autorun: true
+//  });
 
 app.get("/", (request, response) => {
   console.log(Date.now() + " Ping Received");
   response.sendStatus(200);
 });
 
-// app.listen(process.env.PORT);
-// setInterval(() => {
-//   http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-// }, 280000);
+app.listen(process.env.PORT);
+setInterval(() => {
+  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
+}, 280000);
 
 
-bot.on('ready', function (channelID,evt) 
+bot.on('ready', function () 
 {
     //console.log(bot.username);
     //console.log(bot.servers);
     //console.log(bot.channels);
-    bot.setPresence({
-        game: {
-          name: 'dota 6',
-          type: 0
-        }
-    });
 
-    bot.sendMessage({
-        to: MAIN_CHANNEL,
-        message: "Mango bot restarted!"
-    });
-    console.log(bot.username+' aka '+bot.id+' is online and ready!');
+    // const channel = bot.guild.channels.find(ch => ch.name === 'general')
+
+    general = bot.channels.get(MAIN_CHANNEL);
+    //general.send(`test`);
+
+    bot.user.setActivity('dota 6', { type: 'PLAYING' });
+    //console.log(JSON.stringify(bot.user));
+
+    console.log(bot.user.username+' aka '+bot.user.id+' is online and ready!');
+   // console.log(bot.guild.roles.find(role => role.name === "ew"))
+    //console.log(path.resolve(__dirname, 'trash.mp3'));
 });
 
-bot.on('guildMemberAdd', function(callback) 
+bot.on('guildMemberAdd', function(member) 
 {
     console.log("new member?");
-    bot.sendMessage({
-    to: MAIN_CHANNEL,
-    message: "Welcome new persona"
-    });
+    general.send("Hello there "+member.user.username);
+    member.addRole(member.guild.roles.find(role => role.name === "human"));
 });
-bot.on('presence', function(user, userID, status, game, event) 
+
+//user, userID, status, game, event
+bot.on('presenceUpdate', function(oldMember,newMember) 
 {
-    console.log(user+" is "+status)
-    if(userID==GLEB_ID)
+    console.log(newMember.user.username+" is "+newMember.presence.status)
+    if(newMember.user.id==GLEB_ID)
     {
 
         var msg;
         // if(status=="online" && previous!="idle")
         //     msg = '<@'+userID+'> aka GLEB IS HERE!!!!'
         // else 
-        if(status=="offline")
+        if(newMember.presence.status=="offline")
             msg="gleb left cri"
         
-        bot.sendMessage({
-            to: MAIN_CHANNEL,
-            message: msg
-        });
+        general.send(msg);
     }
 });
-
-bot.on('message', function (user, userID, channelID, message, evt) 
+//function (user, userID, channelID, message, evt) 
+bot.on('message', function (message) 
 {
-    if (message.substring(0, 1) == '!') 
+    if(message.author.bot) return;
+
+    if (message.content.substring(0, 1) == '!') 
     {
-        var args = message.substring(1).split(' ');
+        var args = message.content.substring(1).split(' ');
         var cmd = args[0];
         var cmd2 = args[1];
 
@@ -103,22 +108,13 @@ bot.on('message', function (user, userID, channelID, message, evt)
 
         switch(cmd) {
             case 'ping':
-                bot.sendMessage({
-                    to: channelID,
-                    message: '0MS i am so fast'
-                });
+                message.channel.send('0MS i am so fast');
             break;
             case 'banana':
-                bot.sendMessage({
-                    to: channelID,
-                    message: 'no bananas for you <@'+userID+'>'
-                });
+                message.channel.send('no bananas for you '+message.author);
             break;
             case 'help':
-                bot.sendMessage({
-                    to: channelID,
-                    message: 'Figure out your self!'
-                });
+                message.channel.send('Figure out your self!');
             break;
             case 'dota':
                 var found = false;
@@ -129,15 +125,12 @@ bot.on('message', function (user, userID, channelID, message, evt)
                     {
                         console.log("Found "+cmd2);
                         found=true;
-                        getLatestMatch(people.data[i].id,bot,channelID)
+                        getLatestMatch(people.data[i].id,bot,message.channel)
                     }
                 }
                 if(!found)
                 {
-                    bot.sendMessage({
-                        to: channelID,
-                        message: "I dont know this player! try !dotalist"
-                    });
+                    message.channel.send("I dont know this player! try !dotalist");
                 }
             break;
             case 'dotalist':
@@ -146,57 +139,31 @@ bot.on('message', function (user, userID, channelID, message, evt)
                 {
                     all.push(people.data[i].name);
                 }
-                bot.sendMessage({
-                    to: channelID,
-                    message: JSON.stringify(all)
-                });
+
+                message.channel.send(JSON.stringify(all));
             break;
             case 'say':
-                bot.sendMessage({
-                    to: MAIN_CHANNEL,
-                    message: final
-                });
+                general.send(final);
             break;
             case 'voice':
-                var VCID = bot.servers[serverid].members[userID].voice_channel_id;
-                if (!VCID) return;
-
-                bot.joinVoiceChannel(VCID, function(err, events) 
+                if(!message.member.voiceChannel)
                 {
-                    if (err) return console.error(err);
-
-                    events.on('speaking', function(userID, SSRC, speakingBool) 
+                    message.channel.sendMessage("Join voice channel first.");
+                    return;
+                }
+                if(!message.guild.voiceConnection)
+                {
+                    message.member.voiceChannel.join().then(function(connection)
                     {
-                        console.log("%s is " + (speakingBool ? "now speaking" : "done speaking"), userID );
+                        play(connection,message,cmd2);
                     });
-
-                    bot.getAudioContext(VCID, function(error, stream) 
-                    {
-                        if (error) return console.error(error);
-
-                        ytdl('https://www.youtube.com/watch?v=UsnRQJxanVM&t')
-                        .pipe(fs.createWriteStream('video.flv'));
-
-                        fs.createReadStream('video.flv').pipe(stream, {end: false});
-                    
-                        stream.on('done', function() {
-                           console.log("done");
-                        });
-                    });
-
-                });
+                }
             break;
             case 'dc':
-                var VCID = bot.servers[serverid].members[bot.id].voice_channel_id;
-
-                console.log(VCID);
-
-                if (!VCID) return;
-
-                bot.leaveVoiceChannel(VCID,function(err, events)
+                if(message.guild.voiceConnection)
                 {
-                    if (err) return console.error(err);
-                });
+                    message.guild.voiceConnection.disconnect();
+                }
             break;
          }
      }
@@ -204,24 +171,31 @@ bot.on('message', function (user, userID, channelID, message, evt)
      {
         for(var i=0; i<answers.data.length; i++)
         {
-            if(message.indexOf(answers.data[i].phrase) !== -1 && user != bot.username)
+            if(message.content.indexOf(answers.data[i].phrase) !== -1)
             {
-                bot.sendMessage({
-                    to: channelID,
-                    message: answers.data[i].answer
-                });
+                message.channel.send(answers.data[i].answer);
             }
         }
      }
 });
 
-bot.on("disconnect", function() {
-    console.log(bot.username+' has disconnected.');
-	bot.connect()
-});
+function play(connection, message,url)
+{
+    const dispatcher = connection.playStream(ytdl(url,{filter:"audioonly"}));
+    //const dispatcher = connection.playFile(path.resolve(__dirname, 'trash.mp3'));
 
+    dispatcher.on("end",function()
+    {
+        connection.disconnect();
+    });
 
-function getLatestMatch(playerid,bot,channelID)
+    dispatcher.on('error', error => 
+    {
+        console.log(error)
+    });
+}
+
+function getLatestMatch(playerid,bot,channel)
 {
     https.get('https://api.opendota.com/api/players/'+playerid+'/recentMatches', (resp) => 
     {
@@ -234,21 +208,86 @@ function getLatestMatch(playerid,bot,channelID)
         {
             var match = JSON.parse(data)[0].match_id;
             var str = 'https://www.dotabuff.com/matches/'+match;
-            bot.sendMessage({
-                to: channelID,
-                message: str
-            });
+            channel.send(str);
         });
         
     }).on("error", (err) => {
         console.log("Error: " + err.message);
-            bot.sendMessage({
-                to: channelID,
-                message: "Error with dota api"
-            });
+            channel.send("Error with dota api");
         });
 }
 
+
+bot.login(process.env.token);
+
+
+
+/*
+
+  // bot.setPresence({
+    //     game: {
+    //       name: 'dota 6',
+    //       type: 0
+    //     }
+    // });
+
+
+voice:
+   // var VCID = bot.servers[serverid].members[userID].voice_channel_id;
+                // if (!VCID) return;
+
+                // bot.joinVoiceChannel(VCID, function(err, events) 
+                // {
+                //     if (err) return console.error(err);
+
+                //     events.on('speaking', function(userID, SSRC, speakingBool) 
+                //     {
+                //         console.log("%s is " + (speakingBool ? "now speaking" : "done speaking"), userID );
+                //     });
+
+                //     bot.getAudioContext(VCID, function(error, stream) 
+                //     {
+                //         if (error) return console.error(error);
+
+                //         // var vid;
+                //         // try
+                //         // {
+                //         //     vid = ytdl('https://www.youtube.com/watch?v=UsnRQJxanVM&t',{filter: 'audioonly'});
+                //         // }
+                //         // catch(err)
+                //         // {
+                //         //     console.log("Bad youtube link or error getting it:: "+err);
+                //         // }
+                //         //var vid = makeAudio('https://www.youtube.com/watch?v=UsnRQJxanVM&t',stream);
+
+                //         // fs.createReadStream(ytdl('https://www.youtube.com/watch?v=UsnRQJxanVM&t',{filter:"audioonly"})).pipe(stream, {end: false});
+                    
+                //         // stream.on('done', function() {
+                //         //     console.log("done");
+                //         // });
+                //         // .pipe(fs.createWriteStream('video.flv'));
+
+                //         var vid = path.resolve(__dirname, 'trash.mp3');
+                //         fs.createReadStream(vid).pipe(stream, {end: false});
+                    
+                //         stream.on('done', function() {
+                //            console.log("done");
+                //         });
+                //     });
+
+                // });
+
+dc:
+                // var VCID = bot.servers[serverid].members[bot.id].voice_channel_id;
+
+                // console.log(VCID);
+
+                // if (!VCID) return;
+
+                // bot.leaveVoiceChannel(VCID,function(err, events)
+                // {
+                //     if (err) return console.error(err);
+                // });
 async function voiceConnect(message)
 {
     if (!message.guild) return;
@@ -262,3 +301,53 @@ async function voiceConnect(message)
         message.reply('You need to join a voice channel first!');
     }
 }
+
+
+function makeAudio(url,stream)
+{
+    var audioOutput = path.resolve(__dirname, 'sound.mp4');
+    var mainOutput = path.resolve(__dirname, 'audio.mp3');
+
+    console.log("starting to make file.. ");
+
+    ytdl(url, { filter: format => {
+        return format.container === 'm4a' && !format.encoding; } })
+        // Write audio to file since ffmpeg supports only one input stream.
+        .pipe(fs.createWriteStream(audioOutput))
+        .on('finish', () => {
+          ffmpeg()
+            .input(ytdl(url, { filter: format => {
+                return format.container === 'm4a' && !format.encoding; } }))
+            .videoCodec('copy')
+            .input(audioOutput)
+            .audioCodec('copy')
+            .save(mainOutput)
+            .on('error', console.error)
+            .on('progress', progress => {
+              process.stdout.cursorTo(0);
+              process.stdout.clearLine(1);
+              process.stdout.write(progress.timemark);
+            }).on('end', () => {
+              fs.unlink(audioOutput, err => {
+                if(err) console.error(err);
+                else
+                {
+                    console.log('\nfinished downloading '+mainOutput);
+                    // fs.createReadStream(mainOutput).pipe(stream, {end: false});
+                    
+                    // stream.on('done', function() {
+                    //     console.log("done");
+                    // });
+                }
+              });
+            });
+        });
+    console.log("what am i doing here?");
+}
+
+// bot.on("disconnect", function() {
+//     console.log(bot.user.username+' has disconnected.');
+// 	//bot.connect()
+// });
+
+*/
