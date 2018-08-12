@@ -2,35 +2,24 @@ const http = require('http');
 const path   = require('path');
 const express = require('express');
 const app = express();
-var auth = require('./auth.json');
+//var auth = require('./auth.json');
 const https = require('https');
-//var Discord = require('discord.io');
  const Discord = require("discord.js");
 var answers = require ('./answers.json');
 var people = require ('./people.json');
-const fs = require('fs');
 const ytdl = require('ytdl-core');
 const ffmpeg = require('fluent-ffmpeg');
 
 //Ready for main branch
 
- const MAIN_CHANNEL = process.env.mainchannel;
- const GLEB_ID = process.env.glebid;
-
-//const GLEB_ID = auth.glebid;
-// var drole = process.env.drole; 
-//var serverid = process.env.serverid; 
-//const MAIN_CHANNEL = auth.mainchannel;
+const MAIN_CHANNEL = process.env.mainchannel;
+const GLEB_ID = process.env.glebid;
 
 var general; 
 
 //var serverid =auth.serverid; 
 
 var bot = new Discord.Client({autoReconnect:true});
-// {
-//     token: auth.token,
-//     autorun: true
-//  });
 
 app.get("/", (request, response) => {
   console.log(Date.now() + " Ping Received");
@@ -45,21 +34,10 @@ setInterval(() => {
 
 bot.on('ready', function () 
 {
-    //console.log(bot.username);
-    //console.log(bot.servers);
-    //console.log(bot.channels);
-
     // const channel = bot.guild.channels.find(ch => ch.name === 'general')
-
     general = bot.channels.get(MAIN_CHANNEL);
-    //general.send(`test`);
-
     bot.user.setActivity('dota 6', { type: 'PLAYING' });
-    //console.log(JSON.stringify(bot.user));
-
     console.log(bot.user.username+' aka '+bot.user.id+' is online and ready!');
-   // console.log(bot.guild.roles.find(role => role.name === "ew"))
-    //console.log(path.resolve(__dirname, 'trash.mp3'));
 });
 
 bot.on('guildMemberAdd', function(member) 
@@ -69,7 +47,6 @@ bot.on('guildMemberAdd', function(member)
     member.addRole(member.guild.roles.find(role => role.name === "human"));
 });
 
-//user, userID, status, game, event
 bot.on('presenceUpdate', function(oldMember,newMember) 
 {
     console.log(newMember.user.username+" is "+newMember.presence.status)
@@ -86,9 +63,10 @@ bot.on('presenceUpdate', function(oldMember,newMember)
         general.send(msg);
     }
 });
-//function (user, userID, channelID, message, evt) 
+
 bot.on('message', function (message) 
 {
+    console.log(message.author.username+" sent a message.");
     if(message.author.bot) return;
 
     if (message.content.substring(0, 1) == '!') 
@@ -171,7 +149,7 @@ bot.on('message', function (message)
      {
         for(var i=0; i<answers.data.length; i++)
         {
-            if(message.content.indexOf(answers.data[i].phrase) !== -1)
+            if(message.content.toLowerCase().indexOf(answers.data[i].phrase) !== -1)
             {
                 message.channel.send(answers.data[i].answer);
             }
@@ -181,22 +159,25 @@ bot.on('message', function (message)
 
 function play(connection, message,url)
 {
+    console.log("Playing "+url);
     const dispatcher = connection.playStream(ytdl(url,{filter:"audioonly"}));
     //const dispatcher = connection.playFile(path.resolve(__dirname, 'trash.mp3'));
 
     dispatcher.on("end",function()
     {
+        console.log("Done playing");
         connection.disconnect();
     });
 
     dispatcher.on('error', error => 
     {
-        console.log(error)
+        console.log("Error playing:: "+error);
     });
 }
 
 function getLatestMatch(playerid,bot,channel)
 {
+    console.log("Getting dotabuff of "+playerid);
     https.get('https://api.opendota.com/api/players/'+playerid+'/recentMatches', (resp) => 
     {
         let data = '';
