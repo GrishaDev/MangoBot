@@ -2,22 +2,28 @@ const http = require('http');
 const path   = require('path');
 const express = require('express');
 const app = express();
-//var auth = require('./auth.json');
 const https = require('https');
- const Discord = require("discord.js");
+const Discord = require("discord.js");
 var answers = require ('./answers.json');
+var memes = require ('./memes.json');
 var people = require ('./people.json');
 const ytdl = require('ytdl-core');
 const ffmpeg = require('fluent-ffmpeg');
 
-//Ready for main branch
+var auth = require('./auth.json');
 
-const MAIN_CHANNEL = process.env.mainchannel;
-const GLEB_ID = process.env.glebid;
+//Staging!
+
+//Main 
+//const MAIN_CHANNEL = process.env.mainchannel;
+//const GLEB_ID = process.env.glebid;
+
+//Staging
+const MAIN_CHANNEL = auth.mainchannel;
 
 var general; 
 
-//var serverid =auth.serverid; 
+const VOLUME = 0.5;
 
 var bot = new Discord.Client({autoReconnect:true});
 
@@ -92,7 +98,7 @@ bot.on('message', function (message)
                 message.channel.send('no bananas for you '+message.author);
             break;
             case 'help':
-                message.channel.send('Figure out your self!');
+                coolMessage("Help",0xFF0000,"Figure out your self!",message.channel);
             break;
             case 'dota':
                 var found = false;
@@ -103,7 +109,7 @@ bot.on('message', function (message)
                     {
                         console.log("Found "+cmd2);
                         found=true;
-                        getLatestMatch(people.data[i].id,bot,message.channel)
+                        getLatestMatch(people.data[i].id,message.channel)
                     }
                 }
                 if(!found)
@@ -117,11 +123,11 @@ bot.on('message', function (message)
                 {
                     all.push(people.data[i].name);
                 }
-
-                message.channel.send(JSON.stringify(all));
+                coolMessage("Known dota players:",0xFF0000,JSON.stringify(all),message.channel);
             break;
             case 'say':
-                general.send(final);
+                if(final)
+                    general.send(final);
             break;
             case 'voice':
                 if(!message.member.voiceChannel)
@@ -136,6 +142,41 @@ bot.on('message', function (message)
                         play(connection,message,cmd2);
                     });
                 }
+            break;
+            case 'meme':
+                if(!message.member.voiceChannel)
+                {
+                    message.channel.sendMessage("Join voice channel first.");
+                    return;
+                }
+                var found = false;
+                if(!message.guild.voiceConnection)
+                {
+                    for(var i=0; i<memes.data.length; i++)
+                    {
+                        if(memes.data[i].phrase == cmd2)
+                        {
+                            console.log("Found "+cmd2);
+                            found=true;
+                            message.member.voiceChannel.join().then(function(connection)
+                            {
+                                play(connection,message,memes.data[i].url);
+                            });
+                        }
+                    }
+                    if(!found)
+                    {
+                        message.channel.send("I dont know this meme! try !memelist");
+                    }
+                }
+            break;
+            case 'memelist':
+                var all = []
+                for(var i=0; i<memes.data.length;i++)
+                {
+                    all.push(memes.data[i].phrase);
+                }
+                coolMessage("Known memes:",0xFF0000,JSON.stringify(all),message.channel);
             break;
             case 'dc':
                 if(message.guild.voiceConnection)
@@ -161,7 +202,7 @@ function play(connection, message,url)
 {
     console.log("Playing "+url);
     const dispatcher = connection.playStream(ytdl(url,{filter:"audioonly"}));
-    //const dispatcher = connection.playFile(path.resolve(__dirname, 'trash.mp3'));
+    dispatcher.setVolume(VOLUME);
 
     dispatcher.on("end",function()
     {
@@ -175,7 +216,7 @@ function play(connection, message,url)
     });
 }
 
-function getLatestMatch(playerid,bot,channel)
+function getLatestMatch(playerid,channel)
 {
     console.log("Getting dotabuff of "+playerid);
     https.get('https://api.opendota.com/api/players/'+playerid+'/recentMatches', (resp) => 
@@ -198,9 +239,19 @@ function getLatestMatch(playerid,bot,channel)
         });
 }
 
+function coolMessage(title,color,desc,channel)
+{
+    const embed = new Discord.RichEmbed()
+    .setTitle(title)
+    .setColor(color)
+    .setDescription(desc);
 
-bot.login(process.env.token);
+    channel.send(embed);
+}
 
+
+//bot.login(process.env.token);
+bot.login(auth.token);
 
 
 /*
