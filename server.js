@@ -58,12 +58,10 @@ bot.on('presenceUpdate', function(oldMember,newMember)
     console.log(newMember.user.username+" is "+newMember.presence.status)
     if(newMember.user.id==GLEB_ID)
     {
-
         var msg;
-        // if(status=="online" && previous!="idle")
-        //     msg = '<@'+userID+'> aka GLEB IS HERE!!!!'
-        // else 
-        if(newMember.presence.status=="offline")
+        if(oldMember.presence.status=="offline" && newMember.presence.status=="online")
+            msg = '<@'+userID+'> aka GLEB IS HERE!!!!'
+        else if(newMember.presence.status=="offline")
             msg="gleb left cri"
         
         general.send(msg);
