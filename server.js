@@ -142,6 +142,8 @@ bot.on('message', function (message)
                 }
             break;
             case 'meme':
+
+                
                 if(!message.member.voiceChannel)
                 {
                     message.channel.sendMessage("Join voice channel first.");
@@ -158,6 +160,7 @@ bot.on('message', function (message)
                             found=true;
                             message.member.voiceChannel.join().then(function(connection)
                             {
+                                console.log(memes.data[i]);
                                 play(connection,message,memes.data[i].url);
                             });
                         }
