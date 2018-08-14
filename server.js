@@ -158,10 +158,12 @@ bot.on('message', function (message)
                         {
                             console.log("Found "+cmd2);
                             found=true;
+                            var link = memes.data[i].url;
+                            console.log("Gona play "+link);
+
                             message.member.voiceChannel.join().then(function(connection)
                             {
-                                console.log(memes.data[i]);
-                                play(connection,message,memes.data[i].url);
+                                play(connection,message,link);
                             });
                         }
                     }
