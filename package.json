@@ -16,6 +16,7 @@
     "ffmpeg": "0.0.4",
     "fluent-ffmpeg": "^2.1.2",
     "opusscript": "0.0.6",
+    "node-opus": "0.3.0",
     "ytdl-core": "^0.24.0"
   },
   "engines": {
@@ -31,3 +32,4 @@
     "express"
   ]
 }
+

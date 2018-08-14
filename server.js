@@ -10,16 +10,16 @@ var people = require ('./people.json');
 const ytdl = require('ytdl-core');
 const ffmpeg = require('fluent-ffmpeg');
 
-var auth = require('./auth.json');
+//var auth = require('./auth.json');
 
-//Staging!
+//Main
 
 //Main 
-//const MAIN_CHANNEL = process.env.mainchannel;
-//const GLEB_ID = process.env.glebid;
+const MAIN_CHANNEL = process.env.mainchannel;
+const GLEB_ID = process.env.glebid;
 
 //Staging
-const MAIN_CHANNEL = auth.mainchannel;
+//const MAIN_CHANNEL = auth.mainchannel;
 
 var general; 
 
@@ -248,8 +248,8 @@ function coolMessage(title,color,desc,channel)
 }
 
 
-//bot.login(process.env.token);
-bot.login(auth.token);
+bot.login(process.env.token);
+//bot.login(auth.token);
 
 
 /*
